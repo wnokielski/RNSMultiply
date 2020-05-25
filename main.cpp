@@ -10,32 +10,56 @@ int fractionalModulesNumber = 7;
 
 float x, y;
 
-vector<long> xMVRNS, yMVRNS;
-
 long xMachineValue, yMachineValue;
+
+long Rf;
+
+vector<long> xMVRNS, yMVRNS;
 
 vector<long> intermediateProduct;
 
+vector<long> powerTerms;
+
+vector<long> result;
+
 int main(){
+
+	cout<<"Mnożenie liczb stałoprzecinkowych wymiernych w RNS"<<endl;
+	cout<<"Projekt OIaK"<<endl<<endl;
+	cout<<"Autorzy:"<<endl;
+	cout<<"Wojciech Nokielski 241312"<<endl;
+	cout<<"Szymon Tusznio 241131"<<endl<<endl;
 
 	cout<< "Podaj x: ";
 	cin >> x;
-	cout<<endl<<"Podaj y:";
+	cout<<endl<<"Podaj y: ";
 	cin>>y;
 
-	xMachineValue = Conv::floatToMachineValue(x, 7, modules);
-	yMachineValue = Conv::floatToMachineValue(y, 7, modules);
+	powerTerms = Operations::initializePowerTerms(modules, fractionalModulesNumber);
+
+	Rf = Operations::calculateRf(modules, fractionalModulesNumber);
+
+	xMachineValue = Conv::floatToMachineValue(x, 7, modules, Rf);
+	yMachineValue = Conv::floatToMachineValue(y, 7, modules, Rf);
 
 	xMVRNS = Conv::machineValueToRNS(xMachineValue, modules);
 	yMVRNS = Conv::machineValueToRNS(yMachineValue, modules);
 
 	intermediateProduct = Operations::calculateIntermediateProduct(xMVRNS, yMVRNS, modules);
 
-//	printVector(intermediateProduct);
-	cout<<endl;
-	Operations::printVector(Conv::intermediateProductToMRN(intermediateProduct, modules, fractionalModulesNumber));
-	cout<<endl;
-	Operations::printVector(Conv::machineValueToRNS(13376954, modules));
+	result = Conv::intermediateProductToMRN(intermediateProduct, modules, fractionalModulesNumber, powerTerms);
+
+	result = Conv::truncatedMRNToRNS(result, powerTerms, modules, fractionalModulesNumber);
+
+	result = Operations::compareAndRoundUp(result, Rf, powerTerms, modules, fractionalModulesNumber);
+
+	cout<<endl<<x<<" * "<<y<<" = "<<endl<<endl;
+
+	Operations:: printVector(result);
+
+	cout<<endl<<"w systemie RNS o modułach"<<endl<<endl;
+
+	Operations::printVector(modules);
 
 	cin>>y;
 

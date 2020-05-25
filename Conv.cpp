@@ -8,13 +8,7 @@ enum compareFlag{
 	LESS, EQUAL, GREATER
 };
 
-long Conv::floatToMachineValue(float f, int fractionalModulesNumber, vector<long> modules){
-
-	long Rf = 1;
-
-	for(int i=0; i< fractionalModulesNumber; i++){
-		Rf = Rf * modules[i];
-	}
+long Conv::floatToMachineValue(float f, int fractionalModulesNumber, vector<long> modules, long Rf){
 
 	return f * Rf;
 
@@ -67,7 +61,7 @@ vector<long> Conv::getMultiplicativeInversion(long number, vector<long> modules)
 
 }
 
-vector<long> Conv::intermediateProductToMRN(vector<long> number, vector<long> modules, int fractionalModulesNumber){
+vector<long> Conv::intermediateProductToMRN(vector<long> number, vector<long> modules, int fractionalModulesNumber, vector<long> PT){
 
 
 	vector<long> MRC = number;
@@ -88,20 +82,8 @@ vector<long> Conv::intermediateProductToMRN(vector<long> number, vector<long> mo
 
 	vector<long> c;		//rounding constants
 
-	vector<long> PT;	//power terms
-
 	for(int i=0; i< fractionalModulesNumber; i++){		//initializing rounding constants
 		c.push_back(modules[i]/2);
-	}
-
-	for(int i=0; i<fractionalModulesNumber; i++){		//initializing first power terms with zeros
-		PT.push_back(0);
-	}
-
-	PT.push_back(1);		//initializing first non-zero power term with 1
-
-	for(int i=fractionalModulesNumber+1; i<18; i++){
-		PT.push_back(PT.back()*modules[i-1]);
 	}
 
 	int i = 0;
@@ -148,6 +130,21 @@ vector<long> Conv::intermediateProductToMRN(vector<long> number, vector<long> mo
 		ACC += 1;
 
 	return MRN;
+
+}
+
+vector<long> Conv::truncatedMRNToRNS(vector<long> trunc, vector<long> PT, vector<long> modules, int fractionalModulesNumber){
+
+	vector<long> rns;
+	long value = 0;
+
+	for(int i=fractionalModulesNumber; i<18; i++){
+		value += PT[i] * trunc[i];
+	}
+
+	rns = Conv::machineValueToRNS(value, modules);
+
+	return rns;
 
 }
 
