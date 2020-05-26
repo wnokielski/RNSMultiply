@@ -77,13 +77,13 @@ vector<long> Operations::initializePowerTerms(vector<long> modules, int fraction
 
 	PT.push_back(1);
 
-	for(int i=1; i<fractionalModulesNumber; i++){		//initializing first power terms with zeros
+	for(int i=1; i<fractionalModulesNumber; i++){		//initializing first part power terms
 		PT.push_back(PT.back()*modules[i-1]);
 	}
 
-	PT.push_back(1);		//initializing first non-zero power term with 1
+	PT.push_back(1);		
 
-	for(int i=fractionalModulesNumber+1; i<18; i++){
+	for(int i=fractionalModulesNumber+1; i<18; i++){	//initializing second part of power terms
 		PT.push_back(PT.back()*modules[i-1]);
 	}
 
