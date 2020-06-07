@@ -1,0 +1,96 @@
+#multiplication of rational fixed-point numbers
+#with E. Olsen method
+
+#starting from machineValue
+
+#Authors:
+#Wojciech Nokielski 241312
+#Szymon Tusznio 241131
+
+#############################################################
+
+#Rf = m5
+#Power Terms (PTi) realized as LUT (look-up table)
+#m5...m1 - modules
+
+residue xMV, xRNS       	            #convert machine values to RNS
+residue yMV, yRNS
+
+mul_m xRNS, yRNS, iProd 	            #calculate intermediate product, store in iProd
+
+#############################################################
+CONVERSION TO MRN
+#############################################################
+
+mul_m (1/2, 0, 0, 0, 0,), m5, rCon      #rounding constant
+
+mul_m A, (0,0,0,0,0), A                 #multiply A by 0 vector and store result in A
+mul_m cFlag, (0,0,0,0,0), cFlag         #clear cFlag
+mul_m iProd, (1,1,1,1,1), MRC           #multiply iPRod by 1 vector and store result in MRC
+
+mul_m MRC, (1,0,0,0,0), acc             #extract d[5]   (MRN digit)
+mul_m acc, (-1,-1,-1,-1,-1), negAcc     #negate d[5]
+add_m MRC, negAcc, MRC                  #decompose MRC by subtracting d[5], store in MRC
+mul_m MRC, (0, 1/d5%m4, 1/d5%m3, 1/d5%m2, 1/d5%m1), MRC     #decompose MRC by division by d[5] (multiply by inversion), store in MRC
+
+mul_m rCon, (-1, -1, -1, -1, -1), rCon
+add_m acc, rCon, cFlag                  #compare digit and rounding constant
+
+mul_m MRC, (0,1,0,0,0), acc             #extract d[4]   (MRN digit)
+mul_m acc, (-1,-1,-1,-1,-1), negAcc     #negate d[4]
+add_m MRC, negAcc, MRC                  #decompose MRC by subtracting d[4], store in MRC
+mul_m MRC, (0, 0, 1/d4%m3, 1/d4%m2, 1/d4%m1), MRC     #decompose MRC by division by d[4] (multiply by inversion), store in MRC
+mul_m acc, PT4, acc                     #multiply d[4] with pt[4], store in acc
+add A, acc, A                           #add acc to A, store result in A
+
+mul_m MRC, (0,0,1,0,0), acc             #extract d[3]   (MRN digit)
+mul_m acc, (-1,-1,-1,-1,-1), negAcc     #negate d[3]
+add_m MRC, negAcc, MRC                  #decompose MRC by subtracting d[3], store in MRC
+mul_m MRC, (0, 0, 0, 1/d3%m2, 1/d5%m1), MRC     #decompose MRC by division by d[3] (multiply by inversion), store in MRC
+mul_m acc, PT4, acc                     #multiply d[3] with pt[3], store in acc
+add A, acc, A                           #add acc to A, store result in A
+
+mul_m MRC, (0,0,0,1,0), acc             #extract d[2]   (MRN digit)
+mul_m acc, (-1,-1,-1,-1,-1), negAcc     #negate d[2]
+add_m MRC, negAcc, MRC                  #decompose MRC by subtracting d[2], store in MRC
+mul_m MRC, (0, 0, 0, 02, 1/d2%m1), MRC     #decompose MRC by division by d[2] (multiply by inversion), store in MRC
+mul_m acc, PT4, acc                     #multiply d[2] with pt[2], store in acc
+add A, acc, A                           #add acc to A, store result in A
+
+mul_m MRC, (0,0,0,0,1), acc             #extract d[1]   (MRN digit)
+mul_m acc, (-1,-1,-1,-1,-1), negAcc     #negate d[1]
+add_m MRC, negAcc, MRC                  #decompose MRC by subtracting d[1], store in MRC
+mul_m MRC, (0, 0, 0, 0, 0), MRC     #decompose MRC by division by d[1] (multiply by inversion), store in MRC
+mul_m acc, PT4, acc                     #multiply d[1] with pt[1], store in acc
+add A, acc, A                           #add acc to A, store result in A, result in MRN
+
+jge cFlag, INCREMENT
+jmp TRUNC
+
+INCREMENT:
+add 1, A, Authors                       #add 1 to A
+
+################################################################
+TRUNCATED MRN TO RNS
+################################################################
+
+TRUNC:
+
+residue A, truncated
+mul_m value, (0, 0, 0, 0, 0), value
+
+mul_m (0,1,0,0,0), A, truncated
+mul_m truncated, PT4, tmp
+add_m tmp, value, value
+
+mul_m (0,0,1,0,0), A, truncated
+mul_m truncated, PT3, tmp
+add_m tmp, value, value
+
+mul_m (0,0,0,1,0), 2, truncated
+mul_m truncated, PT2, tmp
+add_m tmp, value, value
+
+mul_m (0,0,0,0,1), 1, truncated
+mul_m truncated, PT1, tmp
+add_m tmp, value, value             #final result stored in value
