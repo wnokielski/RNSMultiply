@@ -68,7 +68,7 @@ jge cFlag, INCREMENT
 jmp TRUNC
 
 INCREMENT:
-add 1, A, Authors                       #add 1 to A
+add 1, A, A                             #add 1 to A
 
 ################################################################
 TRUNCATED MRN TO RNS
